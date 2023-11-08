@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <vector>
 using namespace std;
 
 class Sirena;
@@ -61,9 +62,26 @@ public:
     Sirena operator+(const Sirena& other) const {
         return Sirena(intensitate + other.intensitate, culoare, *frecventa + *other.frecventa, tipSirena);
     }
-    
+   
     bool operator==(const Sirena& other) const {
         return intensitate == other.intensitate && culoare == other.culoare && *frecventa == *other.frecventa;
+    }
+
+    friend istream& operator>>(istream& in, Sirena& s) {
+        cout << "Introduceti intensitatea: " << endl;
+        in >> s.intensitate;
+        cout << "Introduceti culoarea: " << endl;
+        in >> s.culoare;
+        cout << "Introduceti frecventa:" << endl;
+        in >> *s.frecventa;
+        return in;
+    }
+
+// Supraincarcare operator << pentru clasa Sirena
+    friend ostream& operator<<(ostream& out, const Sirena& s) {
+        out << "Sirena de tip " << s.tipSirena << " cu culoarea " << s.culoare
+            << " are intensitatea " << s.intensitate << " și frecventa de " << *s.frecventa << " Hz." << endl;
+        return out;
     }
 
     // Get-eri
@@ -142,6 +160,23 @@ public:
     bool operator!=(const AparatFotografiat& other) const {
         return rezolutie != other.rezolutie || tipSenzor != other.tipSenzor || *dimensiuneSenzor != *other.dimensiuneSenzor;
     }
+    friend istream& operator>>(istream& in, AparatFotografiat& a) {
+        // Presupunem că avem acces la membrii privați datorită prieteniei.
+        cout << "Introduceti rezolutia: " << endl;
+        in >> a.rezolutie;
+        cout << "Introduceti tipul senzorului: " << endl;
+        in >> a.tipSenzor;
+        cout << "Introcueti dimensiunea senzorului: " << endl;
+        in >> *a.dimensiuneSenzor;
+        return in;
+    }
+
+    friend ostream& operator<<(ostream& out, const AparatFotografiat& a) {
+        out << "Aparatul fotografic marca " << a.marca << " cu senzorul " << a.tipSenzor
+            << " are rezolutie de " << a.rezolutie << " megapixeli si dimensiunea senzorului de "
+            << *a.dimensiuneSenzor << " mm." << endl;
+        return out;
+    }
 
     // Get-eri
     int getRezolutie() const { return rezolutie; }
@@ -161,6 +196,7 @@ public:
     }
 
 };
+
 
 int AparatFotografiat::numarTotalDeAparate = 0;
 
@@ -236,6 +272,24 @@ public:
         cout << "Numar total de antene: " << numarTotalDeAntene << endl;
     }
     void afiseazaDetaliiAntena(const Antena& ant);
+    // Supraincarcare operator >> pentru clasa Antena
+    friend istream& operator>>(istream& in, Antena& ant) {
+        cout << "Introduceti inaltimea: " << endl;
+        in >> ant.inaltime;
+        cout << "Introduceti tipul: " << endl;
+        in >> ant.tip;
+        cout << "Introduceti lungimea de unda" << endl;
+        in >> *ant.lungimeUnda;
+        return in;
+    }
+
+// Supraincarcare operator << pentru clasa Antena
+    friend ostream& operator<<(ostream& out, const Antena& ant) {
+        out << "Antena de tip " << ant.tip << " din materialul " << ant.material
+            << " are inaltimea de " << ant.inaltime << " metri si lungimea de unde de "
+            << *ant.lungimeUnda << " metri." << endl;
+        return out;
+    }
 
 };
 
@@ -283,13 +337,12 @@ int main() {
     AparatFotografiat::afiseazaNumarAparate();
     Antena::afiseazaNumarAntene();
     Sirena s4, s5;
-    s4 = s1;
+    s4 = s1; 
     s5 = s2;
     ++s4;
     Sirena s6 = s1 + s2;
     bool equal = s6 == s3;
     cout << "Sirena 6 este egala cu sirena 3: " << equal;
-
     AparatFotografiat a4, a5;
     a4 = a1;
     a5 = a2;
@@ -297,7 +350,6 @@ int main() {
     AparatFotografiat a7 = a3 - 5;
     bool notEqual = a1 != a4;
     cout << "Aparatul 1 nu este egala cu Aparatul 4 " << notEqual;
-
     Antena ant4, ant5;
     ant4 = ant1;
     ant5 = ant2;
@@ -306,9 +358,86 @@ int main() {
     bool lessThan = ant1 < ant4;
     cout << "Antena 1 este mai mica ca antena 4: " << lessThan;
     
-    
     afiseazaDetaliiSirena(s1);
     afiseazaDetaliiAparat(a1);
     Antena ant8;
     ant8.afiseazaDetaliiAntena(ant7);
+
+    int numarRânduri, numarColoane;
+    cout << "Introduceti numarul de randuri pentru matricea de sirene: "<< endl;
+    cin >> numarRânduri;
+    cout << "Introduceti numarul de coloane pentru matricea de sirene: "<< endl;
+    cin >> numarColoane;
+
+// Crearea unei matrice de sirene folosind un vector de vectori.
+    vector<vector<Sirena>> matriceSirene(numarRânduri, vector<Sirena>(numarColoane));
+
+// Citirea sirenelor în matrice.
+    for (int i = 0; i < numarRânduri; ++i) {
+        for (int j = 0; j < numarColoane; ++j) {
+            cout << "Introduceti date pentru sirena de la randul " << i + 1 << ", coloana " << j + 1 << ": " << endl;
+            cin >> matriceSirene[i][j];
+        }
+    }
+
+// Afișarea matricei de sirene.
+    cout << "\nMatricea de sirene: \n";
+    for (int i = 0; i < numarRânduri; ++i) {
+        for (int j = 0; j < numarColoane; ++j) {
+            cout << matriceSirene[i][j];
+        }
+        cout << endl; // Săritură de linie între rânduri pentru o mai bună lizibilitate.
+    }
+
+    vector<Sirena> vectorSirene;
+    vector<AparatFotografiat> vectorAparate;
+    vector<Antena> vectorAntene;
+
+// Citirea și adăugarea sirenelor în vector:
+    int numarSirene;
+    cout << "Introduceti numarul de sirene: ";
+    cin >> numarSirene;
+    for (int i = 0; i < numarSirene; ++i) {
+        Sirena sirena;
+        cout << "Introduceti datele pentru sirena " << i+1 << ": " ;
+        cin >> sirena;
+        vectorSirene.push_back(sirena);
+    }
+
+// Afișarea sirenelor:
+    for (const auto& sirena : vectorSirene) {
+        afiseazaDetaliiSirena(sirena);
+    }
+
+    int numarAparate;
+    cout << "Introduceti numarul de aparate fotografice: ";
+    cin >> numarAparate;
+
+    for (int i = 0; i < numarAparate; ++i) {
+        AparatFotografiat aparat;
+        cout << "Introduceti datele pentru aparatul fotografic " << i + 1 << ": ";
+        cin >> aparat;
+        vectorAparate.push_back(aparat);
+    }
+
+// Afișarea aparatelor fotografice:
+    for (const auto& aparat : vectorAparate) {
+        cout << aparat;
+    }
+
+    int numarAntene;
+    cout << "Introduceti numarul de antene: ";
+    cin >> numarAntene;
+
+    for (int i = 0; i < numarAntene; ++i) {
+        Antena antena;
+        cout << "Introduceti datele pentru antena " << i + 1 << ": ";
+        cin >> antena;
+        vectorAntene.push_back(antena);
+    }
+
+// Afișarea antenelor:
+    for (const auto& antena : vectorAntene) {
+        cout << antena;
+    }
 }
