@@ -6,6 +6,10 @@ class Sirena;
 class AparatFotografiat;
 class Antena;
 
+// Prototipurile funcțiilor globale prietene
+void afiseazaDetaliiSirena(const Sirena& s);
+void afiseazaDetaliiAparat(const AparatFotografiat& a);
+void afiseazaDetaliiAntena(const Antena& ant);
 
 class Sirena {
 private:
@@ -40,6 +44,28 @@ public:
         numarTotalDeSirene++;
     }
 
+    Sirena& operator=(const Sirena& other) {
+        if (this != &other) {
+            intensitate = other.intensitate;
+            culoare = other.culoare;
+            *frecventa = *other.frecventa;
+        }
+        return *this;
+    }
+    
+    Sirena& operator++() {
+        ++intensitate;
+        return *this;
+    }
+    
+    Sirena operator+(const Sirena& other) const {
+        return Sirena(intensitate + other.intensitate, culoare, *frecventa + *other.frecventa, tipSirena);
+    }
+    
+    bool operator==(const Sirena& other) const {
+        return intensitate == other.intensitate && culoare == other.culoare && *frecventa == *other.frecventa;
+    }
+
     // Get-eri
     int getIntensitate() const { return intensitate; }
     string getCuloare() const { return culoare; }
@@ -57,8 +83,8 @@ public:
         cout << "Numar total de sirene: " << numarTotalDeSirene << endl;
     }
 
-    
 };
+
 
 int Sirena::numarTotalDeSirene = 0;
 
@@ -96,6 +122,27 @@ public:
         numarTotalDeAparate++;
     }
 
+    AparatFotografiat& operator=(const AparatFotografiat& other) {
+        if (this != &other) {
+            rezolutie = other.rezolutie;
+            tipSenzor = other.tipSenzor;
+            *dimensiuneSenzor = *other.dimensiuneSenzor;
+        }
+        return *this;
+    }
+    
+    AparatFotografiat operator+(int extraRezolutie) const {
+        return AparatFotografiat(rezolutie + extraRezolutie, tipSenzor, *dimensiuneSenzor, marca);
+    }
+    
+    AparatFotografiat operator-(int lessRezolutie) const {
+        return AparatFotografiat(rezolutie - lessRezolutie, tipSenzor, *dimensiuneSenzor, marca);
+    }
+    
+    bool operator!=(const AparatFotografiat& other) const {
+        return rezolutie != other.rezolutie || tipSenzor != other.tipSenzor || *dimensiuneSenzor != *other.dimensiuneSenzor;
+    }
+
     // Get-eri
     int getRezolutie() const { return rezolutie; }
     string getTipSenzor() const { return tipSenzor; }
@@ -113,7 +160,6 @@ public:
         cout << "Numar total de aparate: " << numarTotalDeAparate << endl;
     }
 
-    
 };
 
 int AparatFotografiat::numarTotalDeAparate = 0;
@@ -152,6 +198,27 @@ public:
         numarTotalDeAntene++;
     }
 
+    Antena& operator=(const Antena& other) {
+        if (this != &other) {
+            inaltime = other.inaltime;
+            tip = other.tip;
+            *lungimeUnda = *other.lungimeUnda;
+        }
+        return *this;
+    }
+    
+    Antena operator+(double extraInaltime) const {
+        return Antena(inaltime + extraInaltime, tip, *lungimeUnda, material);
+    }
+    
+    Antena operator-(double lessLungimeUnda) const {
+        return Antena(inaltime, tip, *lungimeUnda - lessLungimeUnda, material);
+    }
+    
+    bool operator<(const Antena& other) const {
+        return inaltime < other.inaltime;
+    }
+
     // Get-eri
     double getInaltime() const { return inaltime; }
     string getTip() const { return tip; }
@@ -168,9 +235,17 @@ public:
     static void afiseazaNumarAntene() {
         cout << "Numar total de antene: " << numarTotalDeAntene << endl;
     }
+    void afiseazaDetaliiAntena(const Antena& ant);
+
 };
 
 int Antena::numarTotalDeAntene = 0;
+
+void Antena::afiseazaDetaliiAntena(const Antena &ant) {
+    cout << "Antena de tip " << ant.tip << " din materialul " << ant.material
+         << " are inaltimea de " << ant.inaltime << " metri si lungimea de unde de " << *ant.lungimeUnda << " metri." << endl;
+}
+
 
 void afiseazaDetaliiSirena(const Sirena& s) {
     cout << "Sirena de tip " << s.getTipSirena() << " cu culoarea " << s.getCuloare()
@@ -185,33 +260,55 @@ void afiseazaDetaliiAparat(const AparatFotografiat& a) {
 int main() {
     Sirena s1(10, "Verde", 150.0, "Acustica");
     Sirena s2(15, "Albastru");
-    Sirena s3;
-    
     s2.setCuloare("Verde");
     s1.setIntensitate(11);
     s2.setFrecventa(12.0);
+    Sirena s3;
 
     AparatFotografiat a1(24, "CCD", 50.0, "Nikon");
     AparatFotografiat a2(20, "CMOS");
-    AparatFotografiat a3;
-    
     a1.setDimensiuneSenzor(51.0);
     a2.setTipSenzor("DDC");
     a2.setRezolutie(50);
+    AparatFotografiat a3;
 
     Antena ant1(15.0, "Directional", 200.0, "Plastic");
     Antena ant2(12.0, "Omni");
     Antena ant3;
-    
     ant1.setInaltime(20.1);
     ant2.setLungimeUnda(200.1);
     ant2.setTip("Directionala");
 
-    afiseazaDetaliiSirena(s1);
-    afiseazaDetaliiAparat(a1);
-    
     Sirena::afiseazaNumarSirene();
     AparatFotografiat::afiseazaNumarAparate();
     Antena::afiseazaNumarAntene();
+    Sirena s4, s5;
+    s4 = s1;
+    s5 = s2;
+    ++s4;
+    Sirena s6 = s1 + s2;
+    bool equal = s6 == s3;
+    cout << "Sirena 6 este egala cu sirena 3: " << equal;
 
+    AparatFotografiat a4, a5;
+    a4 = a1;
+    a5 = a2;
+    AparatFotografiat a6 = a1 + 10;
+    AparatFotografiat a7 = a3 - 5;
+    bool notEqual = a1 != a4;
+    cout << "Aparatul 1 nu este egala cu Aparatul 4 " << notEqual;
+
+    Antena ant4, ant5;
+    ant4 = ant1;
+    ant5 = ant2;
+    Antena ant6 = ant1 + 5.0;
+    Antena ant7 = ant3 - 2.0;
+    bool lessThan = ant1 < ant4;
+    cout << "Antena 1 este mai mica ca antena 4: " << lessThan;
+    
+    
+    afiseazaDetaliiSirena(s1);
+    afiseazaDetaliiAparat(a1);
+    Antena ant8;
+    ant8.afiseazaDetaliiAntena(ant7);
 }
