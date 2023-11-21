@@ -53,16 +53,16 @@ public:
         }
         return *this;
     }
-    
+    // Overloading the prefix increment operator
     Sirena& operator++() {
         ++intensitate;
         return *this;
     }
-    
+    // Overloading the addition operator
     Sirena operator+(const Sirena& other) const {
         return Sirena(intensitate + other.intensitate, culoare, *frecventa + *other.frecventa, tipSirena);
     }
-   
+    // Overloading the equality operator
     bool operator==(const Sirena& other) const {
         return intensitate == other.intensitate && culoare == other.culoare && *frecventa == *other.frecventa;
     }
@@ -148,15 +148,15 @@ public:
         }
         return *this;
     }
-    
+    // Overloading the addition operator
     AparatFotografiat operator+(int extraRezolutie) const {
         return AparatFotografiat(rezolutie + extraRezolutie, tipSenzor, *dimensiuneSenzor, marca);
     }
-    
+    // Overloading the subtraction operator
     AparatFotografiat operator-(int lessRezolutie) const {
         return AparatFotografiat(rezolutie - lessRezolutie, tipSenzor, *dimensiuneSenzor, marca);
     }
-    
+    // Overloading the inequality operator
     bool operator!=(const AparatFotografiat& other) const {
         return rezolutie != other.rezolutie || tipSenzor != other.tipSenzor || *dimensiuneSenzor != *other.dimensiuneSenzor;
     }
@@ -242,15 +242,15 @@ public:
         }
         return *this;
     }
-    
+    // Overloading the addition operator
     Antena operator+(double extraInaltime) const {
         return Antena(inaltime + extraInaltime, tip, *lungimeUnda, material);
     }
-    
+    // Overloading the subtraction operator
     Antena operator-(double lessLungimeUnda) const {
         return Antena(inaltime, tip, *lungimeUnda - lessLungimeUnda, material);
     }
-    
+    // Overloading the less than operator
     bool operator<(const Antena& other) const {
         return inaltime < other.inaltime;
     }
@@ -311,6 +311,75 @@ void afiseazaDetaliiAparat(const AparatFotografiat& a) {
          << a.getDimensiuneSenzor() << " mm." << endl;
 }
 
+
+
+class EchipamentDeUrgenta {
+private:
+    Sirena sirena;
+    AparatFotografiat aparatFotografiat;
+    Antena antena;
+    string locatie;
+    bool esteFunctional;
+
+public:
+    // Constructor fără parametri
+    EchipamentDeUrgenta()
+            : sirena(), aparatFotografiat(), antena(), locatie("Nedefinit"), esteFunctional(false) {}
+
+    // Constructor cu parametri
+    EchipamentDeUrgenta(const Sirena& _sirena, const AparatFotografiat& _aparat, const Antena& _antena, const string& _locatie, bool _esteFunctional)
+            : sirena(_sirena), aparatFotografiat(_aparat), antena(_antena), locatie(_locatie), esteFunctional(_esteFunctional) {}
+
+    // Getteri și Setteri
+    Sirena getSirena() const { return sirena; }
+    void setSirena(const Sirena& _sirena) { sirena = _sirena; }
+
+    AparatFotografiat getAparatFotografiat() const { return aparatFotografiat; }
+    void setAparatFotografiat(const AparatFotografiat& _aparat) { aparatFotografiat = _aparat; }
+
+    Antena getAntena() const { return antena; }
+    void setAntena(const Antena& _antena) { antena = _antena; }
+
+    string getLocatie() const { return locatie; }
+    void setLocatie(const string& _locatie) { locatie = _locatie; }
+
+    bool getEsteFunctional() const { return esteFunctional; }
+    void setEsteFunctional(bool _esteFunctional) { esteFunctional = _esteFunctional; }
+
+    // Operatori
+    EchipamentDeUrgenta& operator++() {
+        ++(sirena.operator++()); // Chemăm explicit operatorul ++ pentru sirena
+        return *this;
+    }
+
+
+    bool operator==(const EchipamentDeUrgenta& other) const {
+        // Compară atribute specifice în loc de întregul obiect
+        return (sirena == other.sirena && aparatFotografiat.getRezolutie() == other.aparatFotografiat.getRezolutie() && antena.getInaltime() == other.antena.getInaltime());
+    }
+
+    EchipamentDeUrgenta operator+(const EchipamentDeUrgenta& other) const {
+        // Combina doar sirenele și fol atributele unuia dintre echipamente pentru restul
+        return EchipamentDeUrgenta(sirena + other.sirena, aparatFotografiat, antena, locatie, esteFunctional || other.esteFunctional);
+    }
+
+    // Operator de atribuire
+    EchipamentDeUrgenta& operator=(const EchipamentDeUrgenta& other) {
+        if (this != &other) {
+            sirena = other.sirena;
+            aparatFotografiat = other.aparatFotografiat;
+            antena = other.antena;
+
+            locatie = other.locatie;
+            esteFunctional = other.esteFunctional;
+        }
+        return *this;
+    }
+
+};
+
+
+
 int main() {
     Sirena s1(10, "Verde", 150.0, "Acustica");
     Sirena s2(15, "Albastru");
@@ -331,49 +400,49 @@ int main() {
     Antena ant3;
     ant1.setInaltime(20.1);
     ant2.setLungimeUnda(200.1);
-    ant2.setTip("Directionala");
+    ant2.setTip("Directional");
 
     Sirena::afiseazaNumarSirene();
     AparatFotografiat::afiseazaNumarAparate();
     Antena::afiseazaNumarAntene();
     Sirena s4, s5;
-    s4 = s1; 
+    s4 = s1; // Using the overloaded assignment operator
     s5 = s2;
-    ++s4;
-    Sirena s6 = s1 + s2;
-    bool equal = s6 == s3;
+    ++s4; // Using the overloaded prefix increment operator
+    Sirena s6 = s1 + s2; // Using the overloaded addition operator
+    bool equal = s6 == s3; // Using the overloaded equality operator
     cout << "Sirena 6 este egala cu sirena 3: " << equal;
     AparatFotografiat a4, a5;
-    a4 = a1;
+    a4 = a1; // Using the overloaded assignment operator
     a5 = a2;
-    AparatFotografiat a6 = a1 + 10;
-    AparatFotografiat a7 = a3 - 5;
-    bool notEqual = a1 != a4;
+    AparatFotografiat a6 = a1 + 10; // Using the overloaded addition operator
+    AparatFotografiat a7 = a3 - 5; // Using the overloaded subtraction operator
+    bool notEqual = a1 != a4; // Using the overloaded inequality operator
     cout << "Aparatul 1 nu este egala cu Aparatul 4 " << notEqual;
     Antena ant4, ant5;
-    ant4 = ant1;
+    ant4 = ant1; // Using the overloaded assignment operator
     ant5 = ant2;
-    Antena ant6 = ant1 + 5.0;
-    Antena ant7 = ant3 - 2.0;
-    bool lessThan = ant1 < ant4;
+    Antena ant6 = ant1 + 5.0; // Using the overloaded addition operator
+    Antena ant7 = ant3 - 2.0; // Using the overloaded subtraction operator
+    bool lessThan = ant1 < ant4; // Using the overloaded less than operator
     cout << "Antena 1 este mai mica ca antena 4: " << lessThan;
-    
+    // Calling friend functions to display details of the objects
     afiseazaDetaliiSirena(s1);
     afiseazaDetaliiAparat(a1);
     Antena ant8;
     ant8.afiseazaDetaliiAntena(ant7);
 
-    int numarRânduri, numarColoane;
+    int numarRanduri, numarColoane;
     cout << "Introduceti numarul de randuri pentru matricea de sirene: "<< endl;
-    cin >> numarRânduri;
+    cin >> numarRanduri;
     cout << "Introduceti numarul de coloane pentru matricea de sirene: "<< endl;
     cin >> numarColoane;
 
 // Crearea unei matrice de sirene folosind un vector de vectori.
-    vector<vector<Sirena>> matriceSirene(numarRânduri, vector<Sirena>(numarColoane));
+    vector<vector<Sirena>> matriceSirene(numarRanduri, vector<Sirena>(numarColoane));
 
 // Citirea sirenelor în matrice.
-    for (int i = 0; i < numarRânduri; ++i) {
+    for (int i = 0; i < numarRanduri; ++i) {
         for (int j = 0; j < numarColoane; ++j) {
             cout << "Introduceti date pentru sirena de la randul " << i + 1 << ", coloana " << j + 1 << ": " << endl;
             cin >> matriceSirene[i][j];
@@ -382,7 +451,7 @@ int main() {
 
 // Afișarea matricei de sirene.
     cout << "\nMatricea de sirene: \n";
-    for (int i = 0; i < numarRânduri; ++i) {
+    for (int i = 0; i < numarRanduri; ++i) {
         for (int j = 0; j < numarColoane; ++j) {
             cout << matriceSirene[i][j];
         }
@@ -440,4 +509,43 @@ int main() {
     for (const auto& antena : vectorAntene) {
         cout << antena;
     }
+
+    // testare clasa EchipamentDeUrgenta
+
+    // Testare constructor fără parametri
+    EchipamentDeUrgenta echipamentDefault;
+    cout << "Echipament default - Locatie: " << echipamentDefault.getLocatie() << ", Este functional: " << (echipamentDefault.getEsteFunctional() ? "Da" : "Nu") << endl;
+
+    // Testare constructor cu parametri
+    Sirena sirenaNoua(15, "Albastru", 120.0, "Digital");
+    AparatFotografiat aparatNou(25, "CMOS", 36.0, "Sony");
+    Antena antenaNoua(20.0, "Directionala", 300.0, "Aluminiu");
+    EchipamentDeUrgenta echipament(sirenaNoua, aparatNou, antenaNoua, "Cluj-Napoca", true);
+    cout << "Echipament - Locatie: " << echipament.getLocatie() << ", Este functional: " << (echipament.getEsteFunctional() ? "Da" : "Nu") << endl;
+
+    // Testare getteri și setteri
+    echipament.setLocatie("Bucuresti");
+    echipament.setEsteFunctional(false);
+    cout << "Echipament actualizat - Locatie: " << echipament.getLocatie() << ", Este functional: " << (echipament.getEsteFunctional() ? "Da" : "Nu") << endl;
+
+    // Testare operatori
+    // Afișarea detaliilor înainte de incrementare
+    cout << "Inainte de incrementare: " << endl;
+    cout << "Intensitate sirena: " << echipament.getSirena().getIntensitate() << endl;
+    ++echipament; // Testare operator ++
+    // Afișarea detaliilor după incrementare
+    cout << "Dupa incrementare: " << endl;
+    cout << "Intensitate sirena: " << echipament.getSirena().getIntensitate() << endl;
+
+    EchipamentDeUrgenta echipamentCopiat = echipament; // Testare operator de atribuire
+    bool suntEgale = (echipament == echipamentCopiat); // Testare operator ==
+    cout << "Echipamentele sunt egale: " << (suntEgale ? "Da" : "Nu") << endl;
+
+    EchipamentDeUrgenta echipamentCombinat = echipament + echipamentCopiat; // Testare operator +
+    cout << "Echipament combinat - Locatie: " << echipamentCombinat.getLocatie() << ", Este functional: " << (echipamentCombinat.getEsteFunctional() ? "Da" : "Nu") << endl;
+    // Afișarea detaliilor componente ale echipamentului combinat
+    cout << "Sirena - Intensitate: " << echipamentCombinat.getSirena().getIntensitate() << ", Culoare: " << echipamentCombinat.getSirena().getCuloare() << endl;
+    cout << "Aparat Fotografiat - Rezolutie: " << echipamentCombinat.getAparatFotografiat().getRezolutie() << ", Tip Senzor: " << echipamentCombinat.getAparatFotografiat().getTipSenzor() << endl;
+    cout << "Antena - Inaltime: " << echipamentCombinat.getAntena().getInaltime() << ", Tip: " << echipamentCombinat.getAntena().getTip() << endl;
+
 }
