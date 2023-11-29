@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 using namespace std;
@@ -6,6 +7,7 @@ using namespace std;
 class Sirena;
 class AparatFotografiat;
 class Antena;
+class EchipamentDeUrgenta;
 
 // Prototipurile funcțiilor globale prietene
 void afiseazaDetaliiSirena(const Sirena& s);
@@ -101,6 +103,56 @@ public:
         cout << "Numar total de sirene: " << numarTotalDeSirene << endl;
     }
 
+
+
+    // Metode pentru lucrul cu fișiere text
+    void scrieInFisierText(const string& numeFisier) {
+        ofstream out(numeFisier);
+        if (out) {
+            out << intensitate << endl << culoare << endl << *frecventa << endl;
+        }
+    }
+
+    void citesteDinFisierText(const string& numeFisier) {
+        ifstream in(numeFisier);
+        if (in) {
+            in >> intensitate >> culoare >> *frecventa;
+        }
+    }
+
+
+    // Metode pentru lucrul cu fișiere binare
+    void scrieInFisierBinar(ofstream& out) {
+        if (out) {
+            out.write(reinterpret_cast<const char*>(&intensitate), sizeof(intensitate));
+            size_t lungimeCuloare = culoare.size();
+            out.write(reinterpret_cast<const char*>(&lungimeCuloare), sizeof(lungimeCuloare));
+            out.write(culoare.c_str(), lungimeCuloare);
+            out.write(reinterpret_cast<const char*>(frecventa), sizeof(double));
+        }
+    }
+
+    void citesteDinFisierBinar(ifstream& in) {
+        if (in) {
+            in.read(reinterpret_cast<char*>(&intensitate), sizeof(intensitate));
+            size_t lungimeCuloare;
+            in.read(reinterpret_cast<char*>(&lungimeCuloare), sizeof(lungimeCuloare));
+            char* buffer = new char[lungimeCuloare + 1];
+            in.read(buffer, lungimeCuloare);
+            buffer[lungimeCuloare] = '\0';
+            culoare = string(buffer);
+            delete[] buffer;
+            double tempFrecventa;
+            in.read(reinterpret_cast<char*>(&tempFrecventa), sizeof(double));
+            if (frecventa != nullptr) {
+                *frecventa = tempFrecventa;
+            } else {
+                frecventa = new double(tempFrecventa);
+            }
+        }
+    }
+
+
 };
 
 
@@ -194,6 +246,55 @@ public:
     static void afiseazaNumarAparate() {
         cout << "Numar total de aparate: " << numarTotalDeAparate << endl;
     }
+
+
+    // Metode pentru lucrul cu fișiere text
+    void scrieInFisierText(const string& numeFisier) {
+        ofstream out(numeFisier);
+        if (out) {
+            out << rezolutie << endl << tipSenzor << endl << *dimensiuneSenzor << endl;
+        }
+    }
+
+    void citesteDinFisierText(const string& numeFisier) {
+        ifstream in(numeFisier);
+        if (in) {
+            in >> rezolutie >> tipSenzor >> *dimensiuneSenzor;
+        }
+    }
+
+
+    // Metode pentru lucrul cu fișiere binare
+    void scrieInFisierBinar(ofstream& out) {
+        if (out) {
+            out.write(reinterpret_cast<const char*>(&rezolutie), sizeof(rezolutie));
+            size_t lungimeTipSenzor = tipSenzor.size();
+            out.write(reinterpret_cast<const char*>(&lungimeTipSenzor), sizeof(lungimeTipSenzor));
+            out.write(tipSenzor.c_str(), lungimeTipSenzor);
+            out.write(reinterpret_cast<const char*>(dimensiuneSenzor), sizeof(double));
+        }
+    }
+
+    void citesteDinFisierBinar(ifstream& in) {
+        if (in) {
+            in.read(reinterpret_cast<char*>(&rezolutie), sizeof(rezolutie));
+            size_t lungimeTipSenzor;
+            in.read(reinterpret_cast<char*>(&lungimeTipSenzor), sizeof(lungimeTipSenzor));
+            char* buffer = new char[lungimeTipSenzor + 1];
+            in.read(buffer, lungimeTipSenzor);
+            buffer[lungimeTipSenzor] = '\0';
+            tipSenzor = string(buffer);
+            delete[] buffer;
+            double tempDimensiuneSenzor;
+            in.read(reinterpret_cast<char*>(&tempDimensiuneSenzor), sizeof(double));
+            if (dimensiuneSenzor != nullptr) {
+                *dimensiuneSenzor = tempDimensiuneSenzor;
+            } else {
+                dimensiuneSenzor = new double(tempDimensiuneSenzor);
+            }
+        }
+    }
+
 
 };
 
@@ -291,6 +392,30 @@ public:
         return out;
     }
 
+
+
+    // Metode pentru lucrul cu fișiere binare
+    void scrieInFisierBinar(ofstream& out) {
+        if (out) {
+            out.write(reinterpret_cast<const char*>(&inaltime), sizeof(inaltime));
+            out.write(reinterpret_cast<const char*>(lungimeUnda), sizeof(double));
+        }
+    }
+
+    void citesteDinFisierBinar(ifstream& in) {
+        if (in) {
+            in.read(reinterpret_cast<char*>(&inaltime), sizeof(inaltime));
+            double tempLungimeUnda;
+            in.read(reinterpret_cast<char*>(&tempLungimeUnda), sizeof(double));
+            if (lungimeUnda != nullptr) {
+                *lungimeUnda = tempLungimeUnda;
+            } else {
+                lungimeUnda = new double(tempLungimeUnda);
+            }
+        }
+    }
+
+
 };
 
 int Antena::numarTotalDeAntene = 0;
@@ -375,6 +500,27 @@ public:
         }
         return *this;
     }
+
+
+    // Metode pentru lucrul cu fișiere binare
+    void scrieInFisierBinar(ofstream& out) {
+        if (out) {
+            sirena.scrieInFisierBinar(out);
+            aparatFotografiat.scrieInFisierBinar(out);
+            antena.scrieInFisierBinar(out);
+            out.write(reinterpret_cast<const char*>(&esteFunctional), sizeof(esteFunctional));
+        }
+    }
+
+    void citesteDinFisierBinar(ifstream& in) {
+        if (in) {
+            sirena.citesteDinFisierBinar(in);
+            aparatFotografiat.citesteDinFisierBinar(in);
+            antena.citesteDinFisierBinar(in);
+            in.read(reinterpret_cast<char*>(&esteFunctional), sizeof(esteFunctional));
+        }
+    }
+
 
 };
 
@@ -547,5 +693,49 @@ int main() {
     cout << "Sirena - Intensitate: " << echipamentCombinat.getSirena().getIntensitate() << ", Culoare: " << echipamentCombinat.getSirena().getCuloare() << endl;
     cout << "Aparat Fotografiat - Rezolutie: " << echipamentCombinat.getAparatFotografiat().getRezolutie() << ", Tip Senzor: " << echipamentCombinat.getAparatFotografiat().getTipSenzor() << endl;
     cout << "Antena - Inaltime: " << echipamentCombinat.getAntena().getInaltime() << ", Tip: " << echipamentCombinat.getAntena().getTip() << endl;
+
+
+    // Testarea metodelor de lucru cu fișiere text pentru Sirena și AparatFotografiat
+    Sirena s;
+    s.scrieInFisierText("sirena.txt");
+    s.citesteDinFisierText("sirena.txt");
+    cout << "Sirena din fisierul text: " << endl;
+    cout << s;
+
+    AparatFotografiat a;
+    a.scrieInFisierText("aparat.txt");
+    a.citesteDinFisierText("aparat.txt");
+    cout << "Aparat Fotografiat din fisierul text: " << endl;
+    cout << a;
+
+    // Testarea metodelor de lucru cu fișiere binare
+    Antena ant;
+    ofstream outAntena("antena.bin", ios::binary);
+    if (outAntena) {
+        ant.scrieInFisierBinar(outAntena);
+        outAntena.close();
+    }
+
+    ifstream inAntena("antena.bin", ios::binary);
+    if (inAntena) {
+        ant.citesteDinFisierBinar(inAntena);
+        inAntena.close();
+    }
+    cout << "Antena din fisierul binar: " << endl;
+    cout << ant;
+
+    EchipamentDeUrgenta e;
+    ofstream outEchipament("echipament.bin", ios::binary);
+    if (outEchipament) {
+        e.scrieInFisierBinar(outEchipament);
+        outEchipament.close();
+    }
+
+    ifstream inEchipament("echipament.bin", ios::binary);
+    if (inEchipament) {
+        e.citesteDinFisierBinar(inEchipament);
+        inEchipament.close();
+    }
+
 
 }
