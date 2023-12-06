@@ -525,6 +525,52 @@ public:
 };
 
 
+class SirenaAvansata : public Sirena {
+private:
+    bool areSistemDeConectare;
+public:
+    SirenaAvansata(int _intensitate, string _culoare, double _frecventa, string _tipSirena, bool _areSistemDeConectare)
+            : Sirena(_intensitate, _culoare, _frecventa, _tipSirena), areSistemDeConectare(_areSistemDeConectare) {}
+
+    bool getAreSistemDeConectare() const {
+        return areSistemDeConectare;
+    }
+
+    void setAreSistemDeConectare(bool _areSistemDeConectare) {
+        areSistemDeConectare = _areSistemDeConectare;
+    }
+
+    void afiseazaDetalii() const {
+        cout << "Sirena Avansata: " << endl;
+        afiseazaDetaliiSirena(*this);
+        cout << "Are sistem de conectare: " << (areSistemDeConectare ? "Da" : "Nu") << endl;
+    }
+};
+
+class AparatFotografiatDigital : public AparatFotografiat {
+private:
+    int rezolutie;
+
+public:
+    AparatFotografiatDigital(int _rezolutie, string _tipSenzor, double _dimensiuneSenzor, string _marca, int _rezolutieDigitala)
+            : AparatFotografiat(_rezolutie, _tipSenzor, _dimensiuneSenzor, _marca), rezolutie(_rezolutieDigitala) {}
+
+    int getRezolutie() const {
+        return rezolutie;
+    }
+
+    void setRezolutie(int _rezolutie) {
+        rezolutie = _rezolutie;
+    }
+
+    void afiseazaDetalii() const {
+        cout << "Aparat Fotografiat Digital: " << endl;
+        afiseazaDetaliiAparat(*this);
+        cout << "Rezolutie: " << rezolutie << " MP" << endl;
+    }
+};
+
+
 
 int main() {
     Sirena s1(10, "Verde", 150.0, "Acustica");
@@ -738,4 +784,13 @@ int main() {
     }
 
 
+    SirenaAvansata sirena1(10, "Alba", 120.0, "Tip1", true);
+    AparatFotografiatDigital aparat1(24, "CMOS", 35.0, "Nikon", 24);
+
+    Sirena *sirenaUpcast = &sirena1;
+    AparatFotografiat *aparatUpcast = &aparat1;
+
+    sirena1.afiseazaDetalii();
+    aparat1.afiseazaDetalii();
+    
 }
