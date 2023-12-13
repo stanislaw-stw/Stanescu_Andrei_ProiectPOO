@@ -9,12 +9,36 @@ class AparatFotografiat;
 class Antena;
 class EchipamentDeUrgenta;
 
-// Prototipurile funcțiilor globale prietene
+
+// Prototipurile functiilor globale prietene
 void afiseazaDetaliiSirena(const Sirena& s);
 void afiseazaDetaliiAparat(const AparatFotografiat& a);
 void afiseazaDetaliiAntena(const Antena& ant);
 
-class Sirena {
+
+class EmitatorSunet {
+public:
+    virtual void scrieInFisierBinar(ofstream& out) const = 0;
+    virtual void citesteDinFisierBinar(ifstream& in) = 0;
+    virtual EmitatorSunet* clone() const = 0;
+    virtual int getIntensitate() const = 0;
+    virtual string getCuloare() const = 0;
+    virtual ~EmitatorSunet() {}
+};
+
+class CaptorImagine {
+public:
+    virtual int getRezolutie() const = 0;
+    virtual string getTipSenzor() const = 0;
+    virtual void scrieInFisierBinar(ofstream& out) const = 0;
+    virtual void citesteDinFisierBinar(ifstream& in) = 0;
+    virtual CaptorImagine* clone() const = 0;
+    virtual ~CaptorImagine() {}
+};
+
+
+
+class Sirena : public EmitatorSunet {
 private:
     int intensitate;
     string culoare;
@@ -87,8 +111,14 @@ public:
     }
 
     // Get-eri
-    int getIntensitate() const { return intensitate; }
-    string getCuloare() const { return culoare; }
+    int getIntensitate() const override {
+        return intensitate;
+    }
+
+    string getCuloare() const override {
+        return culoare;
+    }
+
     double getFrecventa() const { return *frecventa; }
     static int getNumarTotalDeSirene() { return numarTotalDeSirene; }
     string getTipSirena() const { return tipSirena; }
@@ -98,14 +128,12 @@ public:
     void setCuloare(string _culoare) { culoare = _culoare; }
     void setFrecventa(double _frecventa) { *frecventa = _frecventa; }
 
-    // Funcție statică
+    // Functia statica
     static void afiseazaNumarSirene() {
         cout << "Numar total de sirene: " << numarTotalDeSirene << endl;
     }
 
-
-
-    // Metode pentru lucrul cu fișiere text
+    // Metode pentru lucrul cu fisiere text
     void scrieInFisierText(const string& numeFisier) {
         ofstream out(numeFisier);
         if (out) {
@@ -120,9 +148,8 @@ public:
         }
     }
 
-
-    // Metode pentru lucrul cu fișiere binare
-    void scrieInFisierBinar(ofstream& out) {
+    // Metode pentru lucrul cu fisiere binare
+    void scrieInFisierBinar(ofstream& out) const override {
         if (out) {
             out.write(reinterpret_cast<const char*>(&intensitate), sizeof(intensitate));
             size_t lungimeCuloare = culoare.size();
@@ -132,7 +159,7 @@ public:
         }
     }
 
-    void citesteDinFisierBinar(ifstream& in) {
+    void citesteDinFisierBinar(ifstream& in) override {
         if (in) {
             in.read(reinterpret_cast<char*>(&intensitate), sizeof(intensitate));
             size_t lungimeCuloare;
@@ -152,13 +179,15 @@ public:
         }
     }
 
+    Sirena* clone() const override {
+        return new Sirena(*this);
+    }
 
 };
 
-
 int Sirena::numarTotalDeSirene = 0;
 
-class AparatFotografiat {
+class AparatFotografiat : public CaptorImagine {
 private:
     int rezolutie;
     string tipSenzor;
@@ -225,14 +254,20 @@ public:
 
     friend ostream& operator<<(ostream& out, const AparatFotografiat& a) {
         out << "Aparatul fotografic marca " << a.marca << " cu senzorul " << a.tipSenzor
-            << " are rezolutie de " << a.rezolutie << " megapixeli si dimensiunea senzorului de "
+            << " are rezolutieDigitala de " << a.rezolutie << " megapixeli si dimensiunea senzorului de "
             << *a.dimensiuneSenzor << " mm." << endl;
         return out;
     }
 
     // Get-eri
-    int getRezolutie() const { return rezolutie; }
-    string getTipSenzor() const { return tipSenzor; }
+    int getRezolutie() const override {
+        return rezolutie;
+    }
+
+    string getTipSenzor() const override {
+        return tipSenzor;
+    }
+
     double getDimensiuneSenzor() const { return *dimensiuneSenzor; }
     static int getNumarTotalDeAparate() { return numarTotalDeAparate; }
     string getMarca() const { return marca; }
@@ -242,13 +277,12 @@ public:
     void setTipSenzor(string _tipSenzor) { tipSenzor = _tipSenzor; }
     void setDimensiuneSenzor(double _dimensiuneSenzor) { *dimensiuneSenzor = _dimensiuneSenzor; }
 
-    // Funcție statică
+    // Functia statica
     static void afiseazaNumarAparate() {
         cout << "Numar total de aparate: " << numarTotalDeAparate << endl;
     }
 
-
-    // Metode pentru lucrul cu fișiere text
+    // Metode pentru lucrul cu fisiere text
     void scrieInFisierText(const string& numeFisier) {
         ofstream out(numeFisier);
         if (out) {
@@ -263,9 +297,8 @@ public:
         }
     }
 
-
-    // Metode pentru lucrul cu fișiere binare
-    void scrieInFisierBinar(ofstream& out) {
+    // Metode pentru lucrul cu fisiere binare
+    void scrieInFisierBinar(ofstream& out) const override {
         if (out) {
             out.write(reinterpret_cast<const char*>(&rezolutie), sizeof(rezolutie));
             size_t lungimeTipSenzor = tipSenzor.size();
@@ -275,7 +308,7 @@ public:
         }
     }
 
-    void citesteDinFisierBinar(ifstream& in) {
+    void citesteDinFisierBinar(ifstream& in) override{
         if (in) {
             in.read(reinterpret_cast<char*>(&rezolutie), sizeof(rezolutie));
             size_t lungimeTipSenzor;
@@ -295,9 +328,11 @@ public:
         }
     }
 
+    AparatFotografiat* clone() const override {
+        return new AparatFotografiat(*this);
+    }
 
 };
-
 
 int AparatFotografiat::numarTotalDeAparate = 0;
 
@@ -368,7 +403,7 @@ public:
     void setTip(string _tip) { tip = _tip; }
     void setLungimeUnda(double _lungimeUnda) { *lungimeUnda = _lungimeUnda; }
 
-    // Funcție statică
+    // Functia statica
     static void afiseazaNumarAntene() {
         cout << "Numar total de antene: " << numarTotalDeAntene << endl;
     }
@@ -392,9 +427,7 @@ public:
         return out;
     }
 
-
-
-    // Metode pentru lucrul cu fișiere binare
+    // Metode pentru lucrul cu fisiere binare
     void scrieInFisierBinar(ofstream& out) {
         if (out) {
             out.write(reinterpret_cast<const char*>(&inaltime), sizeof(inaltime));
@@ -415,7 +448,6 @@ public:
         }
     }
 
-
 };
 
 int Antena::numarTotalDeAntene = 0;
@@ -425,110 +457,26 @@ void Antena::afiseazaDetaliiAntena(const Antena &ant) {
          << " are inaltimea de " << ant.inaltime << " metri si lungimea de unde de " << *ant.lungimeUnda << " metri." << endl;
 }
 
-
 void afiseazaDetaliiSirena(const Sirena& s) {
     cout << "Sirena de tip " << s.getTipSirena() << " cu culoarea " << s.getCuloare()
          << " are intensitatea " << s.getIntensitate() << " și frecventa de " << s.getFrecventa() << " Hz." << endl;
 }
+
 void afiseazaDetaliiAparat(const AparatFotografiat& a) {
     cout << "Aparatul fotografic marca " << a.getMarca() << " cu senzorul " << a.getTipSenzor()
-         << " are rezolutie de " << a.getRezolutie() << " megapixeli si dimensiunea senzorului de "
+         << " are rezolutieDigitala de " << a.getRezolutie() << " megapixeli si dimensiunea senzorului de "
          << a.getDimensiuneSenzor() << " mm." << endl;
 }
-
-
-
-class EchipamentDeUrgenta {
-private:
-    Sirena sirena;
-    AparatFotografiat aparatFotografiat;
-    Antena antena;
-    string locatie;
-    bool esteFunctional;
-
-public:
-    // Constructor fără parametri
-    EchipamentDeUrgenta()
-            : sirena(), aparatFotografiat(), antena(), locatie("Nedefinit"), esteFunctional(false) {}
-
-    // Constructor cu parametri
-    EchipamentDeUrgenta(const Sirena& _sirena, const AparatFotografiat& _aparat, const Antena& _antena, const string& _locatie, bool _esteFunctional)
-            : sirena(_sirena), aparatFotografiat(_aparat), antena(_antena), locatie(_locatie), esteFunctional(_esteFunctional) {}
-
-    // Getteri și Setteri
-    Sirena getSirena() const { return sirena; }
-    void setSirena(const Sirena& _sirena) { sirena = _sirena; }
-
-    AparatFotografiat getAparatFotografiat() const { return aparatFotografiat; }
-    void setAparatFotografiat(const AparatFotografiat& _aparat) { aparatFotografiat = _aparat; }
-
-    Antena getAntena() const { return antena; }
-    void setAntena(const Antena& _antena) { antena = _antena; }
-
-    string getLocatie() const { return locatie; }
-    void setLocatie(const string& _locatie) { locatie = _locatie; }
-
-    bool getEsteFunctional() const { return esteFunctional; }
-    void setEsteFunctional(bool _esteFunctional) { esteFunctional = _esteFunctional; }
-
-    // Operatori
-    EchipamentDeUrgenta& operator++() {
-        ++(sirena.operator++()); // Chemăm explicit operatorul ++ pentru sirena
-        return *this;
-    }
-
-
-    bool operator==(const EchipamentDeUrgenta& other) const {
-        // Compară atribute specifice în loc de întregul obiect
-        return (sirena == other.sirena && aparatFotografiat.getRezolutie() == other.aparatFotografiat.getRezolutie() && antena.getInaltime() == other.antena.getInaltime());
-    }
-
-    EchipamentDeUrgenta operator+(const EchipamentDeUrgenta& other) const {
-        // Combina doar sirenele și fol atributele unuia dintre echipamente pentru restul
-        return EchipamentDeUrgenta(sirena + other.sirena, aparatFotografiat, antena, locatie, esteFunctional || other.esteFunctional);
-    }
-
-    // Operator de atribuire
-    EchipamentDeUrgenta& operator=(const EchipamentDeUrgenta& other) {
-        if (this != &other) {
-            sirena = other.sirena;
-            aparatFotografiat = other.aparatFotografiat;
-            antena = other.antena;
-
-            locatie = other.locatie;
-            esteFunctional = other.esteFunctional;
-        }
-        return *this;
-    }
-
-
-    // Metode pentru lucrul cu fișiere binare
-    void scrieInFisierBinar(ofstream& out) {
-        if (out) {
-            sirena.scrieInFisierBinar(out);
-            aparatFotografiat.scrieInFisierBinar(out);
-            antena.scrieInFisierBinar(out);
-            out.write(reinterpret_cast<const char*>(&esteFunctional), sizeof(esteFunctional));
-        }
-    }
-
-    void citesteDinFisierBinar(ifstream& in) {
-        if (in) {
-            sirena.citesteDinFisierBinar(in);
-            aparatFotografiat.citesteDinFisierBinar(in);
-            antena.citesteDinFisierBinar(in);
-            in.read(reinterpret_cast<char*>(&esteFunctional), sizeof(esteFunctional));
-        }
-    }
-
-
-};
 
 
 class SirenaAvansata : public Sirena {
 private:
     bool areSistemDeConectare;
 public:
+    // Constructor fara parametri
+    SirenaAvansata() : Sirena(), areSistemDeConectare(false) {}
+
+    // Constructor existent
     SirenaAvansata(int _intensitate, string _culoare, double _frecventa, string _tipSirena, bool _areSistemDeConectare)
             : Sirena(_intensitate, _culoare, _frecventa, _tipSirena), areSistemDeConectare(_areSistemDeConectare) {}
 
@@ -545,31 +493,201 @@ public:
         afiseazaDetaliiSirena(*this);
         cout << "Are sistem de conectare: " << (areSistemDeConectare ? "Da" : "Nu") << endl;
     }
+
+    SirenaAvansata* clone() const override {
+        return new SirenaAvansata(*this);
+    }
+
+    void scrieInFisierBinar(ofstream& out) const override {
+        Sirena::scrieInFisierBinar(out); // Scrie mai intai datele din clasa de baza
+        out.write(reinterpret_cast<const char*>(&areSistemDeConectare), sizeof(areSistemDeConectare));
+    }
+
+    void citesteDinFisierBinar(ifstream& in) override {
+        Sirena::citesteDinFisierBinar(in); // Citeste mai intai datele din clasa de baza
+        in.read(reinterpret_cast<char*>(&areSistemDeConectare), sizeof(areSistemDeConectare));
+    }
+
 };
 
 class AparatFotografiatDigital : public AparatFotografiat {
 private:
-    int rezolutie;
+    int rezolutieDigitala;
 
 public:
-    AparatFotografiatDigital(int _rezolutie, string _tipSenzor, double _dimensiuneSenzor, string _marca, int _rezolutieDigitala)
-            : AparatFotografiat(_rezolutie, _tipSenzor, _dimensiuneSenzor, _marca), rezolutie(_rezolutieDigitala) {}
+    // Constructor fara parametri
+    AparatFotografiatDigital() : AparatFotografiat(), rezolutieDigitala(0) {}
 
-    int getRezolutie() const {
-        return rezolutie;
+    // Constructor existent
+    AparatFotografiatDigital(int _rezolutie, string _tipSenzor, double _dimensiuneSenzor, string _marca, int _rezolutieDigitala)
+            : AparatFotografiat(_rezolutie, _tipSenzor, _dimensiuneSenzor, _marca), rezolutieDigitala(_rezolutieDigitala) {}
+
+    int getRezolutieDigitala() const {
+        return rezolutieDigitala;
     }
 
-    void setRezolutie(int _rezolutie) {
-        rezolutie = _rezolutie;
+    void setRezolutie(int _rezolutieDigitala) {
+        rezolutieDigitala = _rezolutieDigitala;
     }
 
     void afiseazaDetalii() const {
         cout << "Aparat Fotografiat Digital: " << endl;
         afiseazaDetaliiAparat(*this);
-        cout << "Rezolutie: " << rezolutie << " MP" << endl;
+        cout << "Rezolutie digitala: " << rezolutieDigitala << " MP" << endl;
     }
+
+    AparatFotografiatDigital* clone() const override {
+        return new AparatFotografiatDigital(*this);
+    }
+
+    void scrieInFisierBinar(ofstream& out) const override {
+        AparatFotografiat::scrieInFisierBinar(out); // Scrie mai întâi datele din clasa de bază
+        out.write(reinterpret_cast<const char*>(&rezolutieDigitala), sizeof(rezolutieDigitala));
+    }
+
+    void citesteDinFisierBinar(ifstream& in) override {
+        AparatFotografiat::citesteDinFisierBinar(in); // Citește mai întâi datele din clasa de bază
+        in.read(reinterpret_cast<char*>(&rezolutieDigitala), sizeof(rezolutieDigitala));
+    }
+
 };
 
+
+class EchipamentDeUrgenta {
+private:
+    EmitatorSunet* sirena;
+    CaptorImagine* aparatFotografiat;
+    Antena antena;
+    string locatie;
+    bool esteFunctional;
+
+public:
+    // Constructor fara parametri
+    EchipamentDeUrgenta() : sirena(nullptr), aparatFotografiat(nullptr), antena(), locatie("Nedefinit"), esteFunctional(false) {}
+
+    // Constructor cu parametri
+    EchipamentDeUrgenta(EmitatorSunet* _sirena, CaptorImagine* _aparatFotografiat, const Antena& _antena, const string& _locatie, bool _esteFunctional)
+            : sirena(_sirena), aparatFotografiat(_aparatFotografiat), antena(_antena), locatie(_locatie), esteFunctional(_esteFunctional) {}
+
+    ~EchipamentDeUrgenta() {
+        delete sirena;
+        delete aparatFotografiat;
+    }
+
+    // Getteri si Setteri actualizati
+    EmitatorSunet* getSirena() const { return sirena; }
+    void setSirena(EmitatorSunet* _sirena) {
+        delete sirena;
+        sirena = _sirena;
+    }
+
+    CaptorImagine* getAparatFotografiat() const { return aparatFotografiat; }
+    void setAparatFotografiat(CaptorImagine* _aparat) {
+        delete aparatFotografiat;
+        aparatFotografiat = _aparat;
+    }
+
+    Antena getAntena() const { return antena; }
+    void setAntena(const Antena& _antena) { antena = _antena; }
+
+    string getLocatie() const { return locatie; }
+    void setLocatie(const string& _locatie) { locatie = _locatie; }
+
+    bool getEsteFunctional() const { return esteFunctional; }
+    void setEsteFunctional(bool _esteFunctional) { esteFunctional = _esteFunctional; }
+
+    // Operatori
+    EchipamentDeUrgenta& operator++() {
+        if (sirena) {
+            Sirena* sirenaSpecific = dynamic_cast<Sirena*>(sirena);
+            if (sirenaSpecific) {
+                ++(*sirenaSpecific);
+            }
+        }
+        return *this;
+    }
+
+    bool operator==(const EchipamentDeUrgenta& other) const {
+        // Compara atribute specifice
+        return (sirena == other.sirena && aparatFotografiat == other.aparatFotografiat && antena.getInaltime() == other.antena.getInaltime());
+    }
+
+    EchipamentDeUrgenta operator+(const EchipamentDeUrgenta& other) const {
+        // Combina doar sirenele si foloseste atributele unuia dintre echipamente pentru restul
+        EmitatorSunet* nouaSirena = sirena ? sirena : other.sirena;
+        CaptorImagine* nouAparat = aparatFotografiat ? aparatFotografiat : other.aparatFotografiat;
+        return EchipamentDeUrgenta(nouaSirena, nouAparat, antena, locatie, esteFunctional || other.esteFunctional);
+    }
+
+    // Operator de atribuire
+    EchipamentDeUrgenta& operator=(const EchipamentDeUrgenta& other) {
+        if (this != &other) {
+            delete sirena;
+            delete aparatFotografiat;
+            sirena = other.sirena ? other.sirena->clone() : nullptr;
+            aparatFotografiat = other.aparatFotografiat ? other.aparatFotografiat->clone() : nullptr;
+            antena = other.antena;
+            locatie = other.locatie;
+            esteFunctional = other.esteFunctional;
+        }
+        return *this;
+    }
+
+    // Metode pentru lucrul cu fisiere binare
+    void scrieInFisierBinar(ofstream& out) {
+        if (out) {
+            // Scrierea inf despre sirena
+            if (sirena) {
+                int tipSirena = dynamic_cast<Sirena*>(sirena) ? 1 : 0;
+                out.write(reinterpret_cast<const char*>(&tipSirena), sizeof(tipSirena));
+                sirena->scrieInFisierBinar(out);
+            }
+
+            // Scrierea inf despre aparatul fotografiat
+            if (aparatFotografiat) {
+                int tipAparat = dynamic_cast<AparatFotografiat*>(aparatFotografiat) ? 1 : 0;
+                out.write(reinterpret_cast<const char*>(&tipAparat), sizeof(tipAparat));
+                aparatFotografiat->scrieInFisierBinar(out);
+            }
+
+            // Scrierea inf despre antena
+            antena.scrieInFisierBinar(out);
+
+            // Scrierea starii functionale
+            out.write(reinterpret_cast<const char*>(&esteFunctional), sizeof(esteFunctional));
+        }
+    }
+
+    void citesteDinFisierBinar(ifstream& in) {
+        if (in) {
+            // Citirea inf despre sirena
+            int tipSirena;
+            in.read(reinterpret_cast<char*>(&tipSirena), sizeof(tipSirena));
+            if (tipSirena == 1) {
+                sirena = new Sirena();
+            } else {
+                sirena = new SirenaAvansata();
+            }
+            sirena->citesteDinFisierBinar(in);
+
+            // Citirea inf despre aparatul fotografiat
+            int tipAparat;
+            in.read(reinterpret_cast<char*>(&tipAparat), sizeof(tipAparat));
+            if (tipAparat == 1) {
+                aparatFotografiat = new AparatFotografiat();
+            } else {
+                aparatFotografiat = new AparatFotografiatDigital();
+            }
+            aparatFotografiat->citesteDinFisierBinar(in);
+
+            // Citirea inf despre antena
+            antena.citesteDinFisierBinar(in);
+
+            // Citirea starii functionale
+            in.read(reinterpret_cast<char*>(&esteFunctional), sizeof(esteFunctional));
+        }
+    }
+};
 
 
 int main() {
@@ -647,14 +765,14 @@ int main() {
         for (int j = 0; j < numarColoane; ++j) {
             cout << matriceSirene[i][j];
         }
-        cout << endl; // Săritură de linie între rânduri pentru o mai bună lizibilitate.
+        cout << endl;
     }
 
     vector<Sirena> vectorSirene;
     vector<AparatFotografiat> vectorAparate;
     vector<Antena> vectorAntene;
 
-// Citirea și adăugarea sirenelor în vector:
+    // Citirea + adaugarea sirenelor în vector:
     int numarSirene;
     cout << "Introduceti numarul de sirene: ";
     cin >> numarSirene;
@@ -665,7 +783,7 @@ int main() {
         vectorSirene.push_back(sirena);
     }
 
-// Afișarea sirenelor:
+    // Afisarea sirenelor:
     for (const auto& sirena : vectorSirene) {
         afiseazaDetaliiSirena(sirena);
     }
@@ -681,7 +799,7 @@ int main() {
         vectorAparate.push_back(aparat);
     }
 
-// Afișarea aparatelor fotografice:
+    // Afisarea aparatelor fotografice:
     for (const auto& aparat : vectorAparate) {
         cout << aparat;
     }
@@ -697,14 +815,13 @@ int main() {
         vectorAntene.push_back(antena);
     }
 
-// Afișarea antenelor:
+    // Afisarea antenelor:
     for (const auto& antena : vectorAntene) {
         cout << antena;
     }
 
     // testare clasa EchipamentDeUrgenta
-
-    // Testare constructor fără parametri
+    // Testare constructor fara parametri
     EchipamentDeUrgenta echipamentDefault;
     cout << "Echipament default - Locatie: " << echipamentDefault.getLocatie() << ", Este functional: " << (echipamentDefault.getEsteFunctional() ? "Da" : "Nu") << endl;
 
@@ -712,7 +829,8 @@ int main() {
     Sirena sirenaNoua(15, "Albastru", 120.0, "Digital");
     AparatFotografiat aparatNou(25, "CMOS", 36.0, "Sony");
     Antena antenaNoua(20.0, "Directionala", 300.0, "Aluminiu");
-    EchipamentDeUrgenta echipament(sirenaNoua, aparatNou, antenaNoua, "Cluj-Napoca", true);
+
+    EchipamentDeUrgenta echipament(&sirenaNoua, &aparatNou, antenaNoua, "Cluj-Napoca", true);
     cout << "Echipament - Locatie: " << echipament.getLocatie() << ", Este functional: " << (echipament.getEsteFunctional() ? "Da" : "Nu") << endl;
 
     // Testare getteri și setteri
@@ -721,13 +839,13 @@ int main() {
     cout << "Echipament actualizat - Locatie: " << echipament.getLocatie() << ", Este functional: " << (echipament.getEsteFunctional() ? "Da" : "Nu") << endl;
 
     // Testare operatori
-    // Afișarea detaliilor înainte de incrementare
+    // Afisarea detaliilor înainte de incrementare
     cout << "Inainte de incrementare: " << endl;
-    cout << "Intensitate sirena: " << echipament.getSirena().getIntensitate() << endl;
+    cout << "Intensitate sirena: " << echipament.getSirena()->getIntensitate() << endl;
     ++echipament; // Testare operator ++
-    // Afișarea detaliilor după incrementare
+    // Afisarea detaliilor după incrementare
     cout << "Dupa incrementare: " << endl;
-    cout << "Intensitate sirena: " << echipament.getSirena().getIntensitate() << endl;
+    cout << "Intensitate sirena: " << echipament.getSirena()->getIntensitate() << endl;
 
     EchipamentDeUrgenta echipamentCopiat = echipament; // Testare operator de atribuire
     bool suntEgale = (echipament == echipamentCopiat); // Testare operator ==
@@ -735,13 +853,12 @@ int main() {
 
     EchipamentDeUrgenta echipamentCombinat = echipament + echipamentCopiat; // Testare operator +
     cout << "Echipament combinat - Locatie: " << echipamentCombinat.getLocatie() << ", Este functional: " << (echipamentCombinat.getEsteFunctional() ? "Da" : "Nu") << endl;
-    // Afișarea detaliilor componente ale echipamentului combinat
-    cout << "Sirena - Intensitate: " << echipamentCombinat.getSirena().getIntensitate() << ", Culoare: " << echipamentCombinat.getSirena().getCuloare() << endl;
-    cout << "Aparat Fotografiat - Rezolutie: " << echipamentCombinat.getAparatFotografiat().getRezolutie() << ", Tip Senzor: " << echipamentCombinat.getAparatFotografiat().getTipSenzor() << endl;
+    // Afisarea detaliilor componente ale echipamentului combinat
+    cout << "Sirena - Intensitate: " << echipamentCombinat.getSirena()->getIntensitate() << ", Culoare: " << echipamentCombinat.getSirena()->getCuloare() << endl;
+    cout << "Aparat Fotografiat - Rezolutie: " << echipamentCombinat.getAparatFotografiat()->getRezolutie() << ", Tip Senzor: " << echipamentCombinat.getAparatFotografiat()->getTipSenzor() << endl;
     cout << "Antena - Inaltime: " << echipamentCombinat.getAntena().getInaltime() << ", Tip: " << echipamentCombinat.getAntena().getTip() << endl;
 
-
-    // Testarea metodelor de lucru cu fișiere text pentru Sirena și AparatFotografiat
+    // Testarea metodelor de lucru cu fisere text pentru Sirena și AparatFotografiat
     Sirena s;
     s.scrieInFisierText("sirena.txt");
     s.citesteDinFisierText("sirena.txt");
@@ -754,7 +871,7 @@ int main() {
     cout << "Aparat Fotografiat din fisierul text: " << endl;
     cout << a;
 
-    // Testarea metodelor de lucru cu fișiere binare
+    // Testarea metodelor de lucru cu fisiere binare
     Antena ant;
     ofstream outAntena("antena.bin", ios::binary);
     if (outAntena) {
@@ -792,5 +909,38 @@ int main() {
 
     sirena1.afiseazaDetalii();
     aparat1.afiseazaDetalii();
-    
+
+
+    // Crearea unui vector de pointeri la tipul abstract EmitatorSunet
+    vector<EmitatorSunet*> emitatoriSunet;
+    emitatoriSunet.push_back(new Sirena(10, "Rosu", 100.0, "Standard"));
+    emitatoriSunet.push_back(new SirenaAvansata(15, "Albastru", 120.0, "Digital", true));
+
+    // Demonstrarea late-binding-ului pentru EmitatorSunet
+    for (EmitatorSunet* emitator : emitatoriSunet) {
+        cout << "Intensitate: " << emitator->getIntensitate()
+             << ", Culoare: " << emitator->getCuloare() << endl;
+    }
+
+    // Eliberarea memoriei
+    for (EmitatorSunet* emitator : emitatoriSunet) {
+        delete emitator;
+    }
+
+    // Crearea unui vector de pointeri la tipul abstract CaptorImagine
+    vector<CaptorImagine*> captoriImagine;
+    captoriImagine.push_back(new AparatFotografiat(20, "CMOS", 35.0, "Canon"));
+    captoriImagine.push_back(new AparatFotografiatDigital(24, "CMOS", 35.0, "Nikon", 24));
+
+    // Demonstrarea late-binding-ului pentru CaptorImagine
+    for (CaptorImagine* captor : captoriImagine) {
+        cout << "Rezolutie: " << captor->getRezolutie()
+             << ", Tip Senzor: " << captor->getTipSenzor() << endl;
+    }
+
+    // Eliberarea memoriei
+    for (CaptorImagine* captor : captoriImagine) {
+        delete captor;
+    }
+
 }
